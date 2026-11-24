@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prueba CORS de la FFCV</title>
+<h1>Prueba CORS de la FFCV</h1>
+<p>Origen de esta página: <code id="origin"></code></p>
+<p><a id="official" target="_blank" rel="noopener noreferrer">Abrir la página oficial en otra pestaña</a></p>
+<button id="run" type="button">Probar lectura desde el navegador</button>
+<p id="result" role="status"></p>
+<script type="module">
+  const url = new URL('https://ffcv.es/competiciones/?view=partidos&cod_temporada=22&cod_competicion=905432450&cod_grupo=905432454&cod_jornada=5');
+  const button = document.querySelector('#run');
+  const result = document.querySelector('#result');
+  document.querySelector('#origin').textContent = location.origin;
+  document.querySelector('#official').href = url + '#partidos';
+
+  button.addEventListener('click', async () => {
+    button.disabled = true;
+    result.textContent = 'Consultando la página oficial…';
+    try {
+      const response = await fetch(url, {
+        mode: 'cors',
+        credentials: 'omit',
+        signal: AbortSignal.timeout(15000),
+      });
+      const body = await response.text();
+      result.textContent = 'Respuesta legible. HTTP ' + response.status +
+        ' y ' + new TextEncoder().encode(body).length + ' bytes recibidos.';
+    } catch (error) {
+      result.textContent = 'El navegador no pudo leer la respuesta (' + error.name +
+        '). Consulta la consola para distinguir CORS de un fallo de red.';
+    } finally {
+      button.disabled = false;
+    }
+  });
+</script>
+</html>
